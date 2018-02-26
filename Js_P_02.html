@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width">
+  <title>JS Bin</title>
+  <style>
+    #Me_location_x {
+        display: none;
+    }
+
+    #Me_location_y {
+        display: none;
+    }
+
+    #0 {
+        display: none;
+    }
+
+    #1 {
+        display: none;
+    }
+
+    .hidden {
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <div id="location"></div>
+  <div id="Me_location_x"></div>
+  <div id="Me_location_y"></div>
+  <!-- <div id="E_location_x"></div>
+  <div id="E_location_y"></div> -->
+  <div id="0"></div>
+  <div id="1"></div>
+  <div id="state"></div>
+  <div id="table_render">map</div>
+   <!-- <table id="table_render" style='width:100%' border='1px'></table> -->
+    <form>
+      <input id="row" type="text" name="row" placeholder="row">
+      <input id="col" type="text" name="col" placeholder="column">
+      <input id="enemy" type="text" name="enemy" placeholder="enemy">
+      <input type="button" onclick="myFunction()" value="Go">
+    </form>
+  <script>
+/* Question 1
+
+function Total(x){
+  
+  var i=0, sum=0;
+  
+  for(i;i<x;i++){
+    
+    if(i%2 === 0) {
+      sum = sum + i;
+    } else {
+      sum = sum - i;
+    }
+    
+  }
+  
+  return sum;
+  
+}
+
+console.log(Total(101));
+*/
+
+var enemyLoc_x = new Array();
+var enemyLoc_y = new Array();
+
+//var test = document.getElementById("table_render").innerHTML = "aaa";
+//console.log(test)
+
+function checkRule(Me_x, Me_y, E_x, E_y){
+  
+  console.log('In checkRule');
+  
+  // Check y location
+  if((Me_x === E_x) && ( Me_y === E_y || Me_y === (E_y+1) || Me_y === (E_y-1) )){
+    return false;
+  } 
+  
+  // Check x location
+  if ((Me_y === E_y) && ( Me_x === E_x || Me_x === (E_x+1) || Me_x === (E_x-1) )){
+    return false;
+  }
+  
+  return true;
+  
+}
+
+function myFunction() {
+  
+  // Reload value from html label!
+  var old_Me_location_x = document.getElementById("Me_location_x").innerHTML;
+  var old_Me_location_y = document.getElementById("Me_location_y").innerHTML;
+  
+  var old_E_location_x = document.getElementById('0').innerHTML;
+  var old_E_location_y = document.getElementById('1').innerHTML;
+  
+  //var old_E_location_x = document.getElementById("E_location_x").innerHTML;
+  //var old_E_location_y = document.getElementById("E_location_y").innerHTML;
+  var old_E_location_x_Num, old_E_location_y_Num;
+  
+  //console.log(old_Me_location_x, old_Me_location_y,old_E_location_x,old_E_location_y)
+  
+  // Get input row and col value!!
+  var row = document.getElementById("row").value;
+  var col = document.getElementById("col").value;
+  var enemy = document.getElementById("enemy").value;
+  
+  // Transfor string to number
+  var rowNum = Number(row);
+  var colNum = Number(col);
+  var enemyNum = Number(enemy)
+  var e, x=0, y=0, table;
+  //var enemyLoc_x = new Array();
+  //var enemyLoc_y = new Array();
+  //var createEnemyIsDone = 0;
+  var Me_Loc_x = 0, Me_Loc_y = 0;
+  var location, Me_Location_y, E;
+  var Me_location_x, Me_location_y, E_location_x, E_location_y;
+  var gameState = true;
+  var enemyLocTemp = new Array();
+  
+  var E_Loc_x_Temp = new Array();
+  var E_Loc_y_Temp = new Array();
+  
+  if( old_Me_location_x !== "" || old_Me_location_y !== "") {
+    Me_Loc_x = Number(old_Me_location_x);
+    Me_Loc_y = Number(old_Me_location_y);
+  }
+  
+  if( old_E_location_x !== "" || old_E_location_y !== "") {
+    //old_E_location_x_Num = Number(old_E_location_x);
+    //old_E_location_y_Num = Number(old_E_location_y);
+
+    for(e=0;e<enemyNum;e++){
+      var Temp_x = document.getElementById(e*2).innerHTML;
+      var Temp_y = document.getElementById((e*2)+1).innerHTML;
+      E_Loc_x_Temp[e] = Number(Temp_x);
+      E_Loc_y_Temp[e] = Number(Temp_y);
+    }
+  } else {
+    E_Loc_x_Temp = [];
+    E_Loc_y_Temp = [];
+  }
+  
+  var maxNum_row = rowNum - 1;
+  var maxNum_col = colNum - 1;
+  var minNum = 0;  
+  //var x_ran = Math.floor(Math.random() * (maxNum - minNum + 1)) + minNum;
+  //var y_ran = Math.floor(Math.random() * (maxNum - minNum + 1)) + minNum;
+  //console.log("random")
+  //console.log(x_ran, y_ran);
+  
+  // Stop negative input value!!
+  if( rowNum<0 || colNum<0 || enemyNum<0 ) {
+    document.getElementById("state").innerHTML = "<p style='color:red'>You input incorrect value!!</p>";  
+    console.log("error---1");
+    return;
+  }
+  //console.log(enemyNum)
+  
+  for(e=0;e<enemyNum;e++){
+    enemyLoc_x[e] = Math.floor(Math.random() * (maxNum_row - minNum)) + minNum;
+    enemyLoc_y[e] = Math.floor(Math.random() * (maxNum_col - minNum)) + minNum;
+    //createEnemyIsDone = 1;
+    console.log(enemyLoc_x[e], enemyLoc_y[e]);
+  }
+  //if( old_Me_location_x !== "" || old_Me_location_y !== "" ) {
+  if( Me_Loc_x < maxNum_row || Me_Loc_y < maxNum_col ) {
+    
+    var checkresult = true; 
+    if(E_Loc_x_Temp.length > 0 || E_Loc_y_Temp.length > 0) {
+      for(e=0; e<enemyNum ;e++){
+      
+        old_E_location_x_Num = E_Loc_x_Temp[e];
+        old_E_location_y_Num = E_Loc_y_Temp[e];
+        if(Me_Loc_x < maxNum_row ){
+          checkresult = (checkRule(Me_Loc_x+1, Me_Loc_y, old_E_location_x_Num, old_E_location_y_Num)) && checkresult ;
+        }
+      }
+    
+      var M_T_P_X = false;
+      if(checkresult && Me_Loc_x < maxNum_row){
+        console.log("Me_Loc_x = Me_Loc_x + 1;")
+        Me_Loc_x = Me_Loc_x + 1;
+        M_T_P_X = true;
+      }
+
+      
+      var M_T_P_Y = false;
+      if(M_T_P_X === true) {
+        // Do nothing
+      } else {
+        checkresult = true;
+        for(e=0; e<enemyNum ;e++){
+      
+        old_E_location_x_Num = E_Loc_x_Temp[e];
+        old_E_location_y_Num = E_Loc_y_Temp[e];
+          if(Me_Loc_y < maxNum_col){
+            checkresult = checkRule(Me_Loc_x, Me_Loc_y+1, old_E_location_x_Num, old_E_location_y_Num) && checkresult;
+          } 
+        }
+      //}
+      
+      //var M_T_P_Y = false;
+      if(checkresult && Me_Loc_y < maxNum_col){
+        console.log("Me_Loc_y = Me_Loc_y + 1;")
+        Me_Loc_y = Me_Loc_y + 1;
+        M_T_P_Y = true;
+      }
+      }
+      
+      var M_T_N_X = false;
+      if(M_T_P_X === true || M_T_P_Y === true) {
+        // Do nothing
+      } else {
+        checkresult = true;
+        for(e=0; e<enemyNum ;e++){
+          old_E_location_x_Num = E_Loc_x_Temp[e];
+          old_E_location_y_Num = E_Loc_y_Temp[e];
+          if(Me_Loc_x > minNum){
+            checkresult = checkRule(Me_Loc_x-1, Me_Loc_y, old_E_location_x_Num, old_E_location_y_Num) && checkresult;
+          }
+        }
+      //}
+      
+      
+      if(checkresult && Me_Loc_x > minNum){
+        console.log("Me_Loc_x = Me_Loc_x - 1;");
+        Me_Loc_x = Me_Loc_x - 1;
+        M_T_N_X = true;
+      }
+      }
+    
+      var M_T_N_Y = false;
+      if(M_T_P_X === true || M_T_P_Y === true || M_T_N_X === true) {
+          // Do nothing
+      } else {
+        checkresult = true;
+        for(e=0; e<enemyNum ;e++){
+          old_E_location_x_Num = E_Loc_x_Temp[e];
+          old_E_location_y_Num = E_Loc_y_Temp[e];
+          if(Me_Loc_y > minNum){
+            checkresult = checkRule(Me_Loc_x, Me_Loc_y-1, old_E_location_x_Num, old_E_location_y_Num) && checkresult;
+          }
+        }
+      
+      //var M_T_N_Y = false;
+      if(checkresult && Me_Loc_y > minNum){
+        console.log("Me_Loc_y = Me_Loc_y - 1;");
+        Me_Loc_y = Me_Loc_y - 1;
+        M_T_N_Y = true;
+      }
+      }
+    
+        //var checkresult = checkRule(Me_Loc_x+1)
+        if(!checkresult) {
+          if( old_Me_location_x === "" || old_Me_location_y === "" ){
+            Me_Loc_y = 0;
+            Me_Loc_x = 0;
+          }
+          document.getElementById("state").innerHTML = "<p style='color:red'>Game Over!!</p>";
+          gameState = false;
+        } else {
+          if( old_Me_location_x === "" || old_Me_location_y === "" ){
+            Me_Loc_y = 0;
+            Me_Loc_x = 0;
+            document.getElementById("state").innerHTML = "<p style='color:Blue'>Game start!!</p>";
+          } else {
+            if(Me_Loc_y === maxNum_col && Me_Loc_x === maxNum_row ) {
+              document.getElementById("state").innerHTML = "<p style='color:Green'>Mission Completed</p>";  
+            } else {
+              document.getElementById("state").innerHTML = "<p style='color:Blue'>On Going</p>";
+            }
+          }
+        }
+      }
+  
+  } else {
+    document.getElementById("state").innerHTML = "<p style='color:Green'>Mission Completed</p>";   
+  }
+  //} else {
+    //document.getElementById("state").innerHTML = "<p style='color:Blue'>Game start!!</p>";
+  //}
+  
+  //var result = checkRule(2,4,3,4);
+  //console.log("result: "+result);
+  // Check state
+  /*
+  if( (Me_Loc_x < (enemyLoc_x[0]-1)) || (Me_Loc_x > (enemyLoc_x[0]+1)) || (Me_Loc_y < (enemyLoc_y[0]-1)) || (Me_Loc_y > (enemyLoc_y[0]+1)) ) {
+    if(Me_Loc_x === rowNum && Me_Loc_y === colNum ) {
+      document.getElementById("state").innerHTML = "<p style='color:Blue'>Mission Completed</p>";  
+    } else {
+      document.getElementById("state").innerHTML = "<p style='color:green'>On Going</p>";
+    }
+  } else {
+    document.getElementById("state").innerHTML = "<p style='color:red'>Game Over!!</p>";
+    //return;
+  }
+  */
+  console.log("enemyLoc_x: " + enemyLoc_x[0]);
+  console.log("indexOf: " + enemyLoc_x.indexOf(0));
+  
+  table = "<table style='width:100%' border='1px' id='table_render'>"
+  
+  //for( e=0 ; e<enemyNum ; e++ ) {
+    for( x ; x<rowNum ; x++ ) {
+      //console.log('x')
+      enemyLocTemp = [];
+      for( e=0 ; e<enemyNum ; e++ ){
+        if(enemyLoc_x[e] === x){
+          enemyLocTemp.push(e)
+        }
+      }
+      console.log("enemyLocTemp: "+enemyLocTemp)
+      table = table + "<tr>";
+    
+      for( y=0 ; y<colNum ; y++ ){
+        
+        /*
+        if( Me_Loc_x === x && Me_Loc_y === y ){
+          table = table + "<td> Me </td>";
+        } else if( enemyLoc_x[e] === x && enemyLoc_y[e] === y ) {
+          table = table + "<td> E </td>"; 
+        } else {
+          table = table + "<td></td>";
+        }
+        */
+        
+        if( Me_Loc_x === x && Me_Loc_y === y ){
+          table = table + "<td> Me </td>";
+        } else if(typeof enemyLocTemp !== 'undefined' && enemyLocTemp.length > 0){
+          var checkenemy = false;
+          for( g=0 ; g<enemyLocTemp.length ; g++ ){
+            var Index_of_E = enemyLocTemp[g];
+            if(enemyLoc_y[Index_of_E] === y) {
+              console.log('enemyLoc_y[Index_of_E] === y: '+ enemyLocTemp.length)
+              checkenemy = true;
+              //table = table + "<td> E" + g + " </td>";
+            } //else {
+              //console.log('enemyLocTemp[g] === y, else: '+ enemyLocTemp.length)
+              //table = table + "<td></td>";
+            //}
+          }
+          
+          if(checkenemy) {
+            table = table + "<td> E </td>";
+          } else {
+            table = table + "<td></td>";
+          }
+
+        } else {
+          console.log('Me_Loc_x === x && Me_Loc_y === y, else')
+          table = table + "<td></td>";
+        }
+        //console.log('y')
+      }
+      table = table + "</tr>";
+    }
+ // }
+  
+  location = "Me: (" + Me_Loc_x + "," + Me_Loc_y + ") ; Enemy: "; 
+  for(e=0;e<enemyNum;e++){
+    location = location + "(" + enemyLoc_x[e] + "," + enemyLoc_y[e] + ")";
+  }
+  
+  table= table + "</table>";
+  document.getElementById("location").innerHTML = location;
+  document.getElementById("Me_location_x").innerHTML = Me_Loc_x;
+  document.getElementById("Me_location_y").innerHTML = Me_Loc_y;
+  
+  for(e=0;e<enemyNum;e++){
+    
+    if( e === 0 ){
+      var g = document.getElementById('0');
+      var h = document.getElementById('1');
+      g.setAttribute("class", 'hidden');
+      h.setAttribute("class", 'hidden');
+      g.innerHTML = enemyLoc_x[e];
+      h.innerHTML = enemyLoc_y[e];
+    } else {
+    
+    var g=document.createElement('div');
+    g.setAttribute("id", e*2);
+    g.setAttribute("class", 'hidden');
+    document.body.appendChild(g);
+    document.getElementById(e*2).innerHTML = enemyLoc_x[e];
+    
+    var h=document.createElement('div');
+    h.setAttribute("id", (e*2)+1 );
+    h.setAttribute("class", 'hidden');
+    document.body.appendChild(h);
+    document.getElementById((e*2)+1).innerHTML = enemyLoc_y[e];
+    }
+  }
+  //document.getElementById("E_location_x").innerHTML = enemyLoc_x[0];
+  //document.getElementById("E_location_y").innerHTML = enemyLoc_y[0];
+  document.getElementById("table_render").innerHTML = table;
+  console.log(rowNum, colNum);
+}
+  </script>
+</body>
+</html>
